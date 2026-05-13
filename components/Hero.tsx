@@ -1,15 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { MagneticLink } from './MagneticLink';
-
-const Blob3D = dynamic(() => import('./Blob3D').then((m) => m.Blob3D), {
-  ssr: false,
-  loading: () => null,
-});
 
 const descriptors = ['apps', 'tools', 'dashboards', 'AI workflows', 'products'];
 const easeOut = [0.16, 1, 0.3, 1] as const;
@@ -43,32 +37,6 @@ function RotatingWord() {
 }
 
 export function Hero() {
-  // Blob uses deep purple as base + mint as rim/specular so it reads as a portrait shadow,
-  // not a separate green object.
-  const [tone, setTone] = useState({ base: '#603080', rim: '#7ed3a8' });
-  const [showBlob, setShowBlob] = useState(false);
-
-  useEffect(() => {
-    const read = () => {
-      const cs = getComputedStyle(document.documentElement);
-      const deep = cs.getPropertyValue('--deep').trim();
-      const accent = cs.getPropertyValue('--accent').trim();
-      if (deep && accent) setTone({ base: deep, rim: accent });
-    };
-    read();
-    const obs = new MutationObserver(read);
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => obs.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) return;
-
-    const timer = window.setTimeout(() => setShowBlob(true), 700);
-    return () => window.clearTimeout(timer);
-  }, []);
-
   return (
     <section
       id="top"
@@ -175,27 +143,13 @@ export function Hero() {
             </motion.div>
           </div>
 
-          {/* Right portrait + 3D blob */}
+          {/* Right portrait */}
           <motion.div
             initial={{ opacity: 0, scale: 0.92 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.1, delay: 0.2, ease: easeOut }}
             className="order-1 lg:order-2 relative aspect-square w-full max-w-[480px] mx-auto"
           >
-            {/* 3D blob behind, masked to a soft radial so the canvas square edge
-                doesn't read as a frame around the portrait */}
-            <div
-              className="absolute inset-0 -z-10"
-              style={{
-                WebkitMaskImage:
-                  'radial-gradient(circle at 50% 50%, black 38%, transparent 72%)',
-                maskImage:
-                  'radial-gradient(circle at 50% 50%, black 38%, transparent 72%)',
-              }}
-            >
-              {showBlob && <Blob3D tone={tone} />}
-            </div>
-
             {/* Soft glow */}
             <div
               className="absolute inset-8 rounded-full blur-3xl opacity-60"
